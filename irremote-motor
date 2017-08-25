@@ -1,0 +1,99 @@
+#include <IRremote.h>
+#include <Servo.h> 
+
+#define GROUND_JOY_PIN A3
+#define VOUT_JOY_PIN A2
+#define XJOY_PIN A1
+
+
+int RECV_PIN = 11;
+int servo_reach = 10;
+int servo_joint = 12;
+int servo_clw = 9;
+int servo_base = 8;
+int val;
+int potpin = 0;
+
+
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+
+Servo servoreach, servojoint, servoclw, servobase;
+
+void setup()
+{
+  Serial.begin(9600);
+  irrecv.enableIRIn(); // Start the receiver
+  pinMode(VOUT_JOY_PIN, OUTPUT) ;    //pin A3 shall be used as output
+  pinMode(GROUND_JOY_PIN, OUTPUT) ;  //pin A2 shall be used as output
+  digitalWrite(VOUT_JOY_PIN, HIGH) ; //set pin A3 to high (+5V)
+  digitalWrite(GROUND_JOY_PIN,LOW) ; //set pin A3 to low (ground)
+  servoclw.attach(servo_clw);
+  servoclw.write (32);
+  servoreach.attach (servo_reach);
+  servoreach.write (50);
+  servobase.attach (servo_base);
+  servobase.write (0);
+  servojoint.attach (servo_joint);
+  servojoint.write (82);
+  
+}
+
+void loop()
+{
+     
+    if (irrecv.decode(&results))   {
+    Serial.println(results.value, HEX);
+    Serial.println(results.value);
+    switch (results.value){
+      case 16720605:
+        servoclw.write (75);
+        delay (50);
+      break;
+
+      case 4294967295:
+       servoclw.write (32);
+       delay (50);
+      break;
+
+      case 16738455:
+      servoclw.write (40);
+      delay(50);
+      break;
+
+      case 16724175:
+      servoclw.write (45);
+      delay(50);
+      break;
+
+      case 16718055:
+      servoclw.write (50);
+      delay (50);
+      break;
+
+      case 16716015:
+      servojoint.write (45);
+      delay (50);
+      break;
+
+      case 16726215:
+      servojoint.write (70);
+      delay (50);
+      break;
+
+      default:
+      delay (50);
+    }
+    irrecv.resume(); // Receive the next value
+}
+
+    val = analogRead (potpin);
+    val = map (val, 0, 1023, 30, 80);
+    servoreach.write (val);
+    delay (50);
+
+    int joystickVal = analogRead (XJOY_PIN);
+    servobase.write ((joystickVal + 520)/10);
+    delay (50);
+ 
+}
